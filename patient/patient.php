@@ -1,31 +1,33 @@
 <?php
-session_start();
+// 1. Fix Session Notice: Only start if one isn't active
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
-// Simple login check
+// 2. Security Check: Redirect to login if session is empty
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
     exit();
 }
 
-include '../action/connection.php'; // <-- your database connection
+include '../action/connection.php'; 
 
 $user_id = $_SESSION['user_id'];
+$user_name = $_SESSION['user_name'];
+$role = $_SESSION['user_type'] ?? 'patient'; 
 
-// Fetch next upcoming appointment for this patient (updated to show all services)
-$stmt = $connect->prepare("
-    SELECT a.appointment_date, a.appointment_time, GROUP_CONCAT(s.service_name SEPARATOR ', ') AS service_names, d.name AS dentist_name, a.status
-    FROM appointments a
-    JOIN dentists d ON a.dentist_id = d.id
-    JOIN appointment_services asv ON a.id = asv.appointment_id
-    JOIN services s ON asv.service_id = s.id
-    WHERE a.user_id = ? AND a.appointment_date >= CURDATE()
-    GROUP BY a.id
-    ORDER BY a.appointment_date ASC, a.appointment_time ASC
-    LIMIT 1
-");
-$stmt->bind_param("i", $user_id);
-$stmt->execute();
-$appointment = $stmt->get_result()->fetch_assoc();
+// 3. Fetch User Profile Details (This uses your existing 'users' table)
+$user_query = $connect->prepare("SELECT name, email FROM users WHERE id = ?");
+$user_query->bind_param("i", $user_id);
+$user_query->execute();
+$user_data = $user_query->get_result()->fetch_assoc();
+
+/** * NOTE: The following variables are set to null because the tables 
+ * 'medical_history', 'appointments', and 'dentists' do not exist yet.
+ * This prevents the "Fatal error: Table doesn't exist" crash.
+ */
+$history = null; 
+$appointment = null; 
 ?>
 
 <!DOCTYPE html>
@@ -33,133 +35,187 @@ $appointment = $stmt->get_result()->fetch_assoc();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Peter Dental - Gentle Care for Your Smile</title>
+    <title>Peter Dental - Patient Dashboard</title>
     
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
-    
-    <!-- FontAwesome -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- Existing CSS -->
-    <link rel="stylesheet" href="../assets/css/patient.css">
-
     <style>
-        body {
-            font-family: 'Open Sans', sans-serif;
-            background-color: #f8f9fa;
+        :root {
+            --peter-pink: #ff6b9d;
+            --light-pink: #fff0f5;
+            --text-dark: #333;
+            --shadow: 0 10px 30px rgba(0,0,0,0.05);
         }
 
-        main.container {
-            padding-top: 140px;
-            max-width: 900px;
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #fcfcfc;
+            margin: 0;
+            color: var(--text-dark);
+        }
+
+        /* Navbar */
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 8%;
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+        }
+
+        .logo { color: var(--peter-pink); font-weight: 700; font-size: 24px; text-decoration: none; }
+        
+        .nav-links a {
+            text-decoration: none;
+            color: var(--peter-pink);
+            margin-left: 30px;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .btn-logout {
+            background: var(--peter-pink);
+            color: white !important;
+            padding: 8px 20px;
+            border-radius: 20px;
+        }
+
+        /* Main Layout */
+        .main-content {
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            gap: 40px;
+            padding: 40px 8%;
+            max-width: 1400px;
             margin: auto;
         }
 
-        main h2 {
-            font-family: 'Poppins', sans-serif;
-            font-weight: 600;
-            margin-bottom: 20px;
-            font-size: 28px;
-            color: #333;
-        }
-
-        .stats {
-            display: flex;
-            gap: 20px;
-            flex-wrap: wrap;
-            margin-top: 20px;
-        }
-
-        .card {
+        /* Profile Sidebar */
+        .profile-card {
             background: white;
-            flex: 1 1 200px;
-            padding: 25px 20px;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-            transition: transform 0.3s, box-shadow 0.3s;
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            text-align: center;
+            padding-bottom: 20px;
         }
 
-        .card h4 {
-            font-size: 18px;
-            font-weight: 600;
-            color: #555;
-            margin-bottom: 10px;
+        .card-header-pink {
+            background: var(--peter-pink);
+            height: 80px;
+            position: relative;
+            margin-bottom: 50px;
         }
 
-        .card p {
-            font-size: 16px;
-            color: #777;
+        .profile-img {
+            width: 90px;
+            height: 90px;
+            background: #eee;
+            border-radius: 50%;
+            position: absolute;
+            bottom: -45px;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 5px solid white;
+            display: flex;
+            align-items: center; justify-content: center;
+            font-size: 30px; color: #ccc;
         }
 
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+        .patient-info-box {
+            background: var(--light-pink);
+            border-radius: 15px;
+            margin-top: 20px;
+            padding: 25px;
         }
 
-        .welcome-msg {
-            font-size: 20px;
-            margin-bottom: 30px;
-            color: #333;
+        /* Content Card */
+        .history-card {
+            background: white;
+            border-radius: 15px;
+            padding: 35px;
+            box-shadow: var(--shadow);
         }
 
-        @media (max-width: 600px) {
-            .stats {
-                flex-direction: column;
-            }
+        .history-header h2 { color: var(--peter-pink); margin-top: 0; }
+
+        .info-row {
+            padding: 15px 0;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .empty-notice {
+            color: #999;
+            font-style: italic;
+            padding: 20px 0;
+        }
+
+        @media (max-width: 900px) {
+            .main-content { grid-template-columns: 1fr; }
         }
     </style>
 </head>
 <body>
-  
-  <?php include '../component/patient_navbar.php'; ?>
 
-<main class="container">
-    <div class="welcome-msg">
-        Welcome back, <?php echo htmlspecialchars($_SESSION['user_name']); ?> 👋
-    </div>
+    <nav class="navbar">
+        <a href="#" class="logo">Peter Dental</a>
+        <div class="nav-links">
+            <a href="#">Dashboard</a>
+            <a href="../logout.php" class="btn-logout">Logout</a>
+        </div>
+    </nav>
 
-    <div class="stats">
-        <div class="card">
-            <h4><i class="fa-solid fa-calendar-check"></i> Upcoming Appointment</h4>
-            <?php if ($appointment): ?>
-                <p>
-                    <?php 
-                        echo date("F j, Y", strtotime($appointment['appointment_date'])) . " at " . date("h:i A", strtotime($appointment['appointment_time']));
-                        echo "<br>Services: " . htmlspecialchars($appointment['service_names']);  // Now shows all services
-                        echo "<br>Dentist: " . htmlspecialchars($appointment['dentist_name']);
-                    ?>
-                </p>
-            <?php else: ?>
-                <p>No upcoming appointment</p>
-            <?php endif; ?>
+    <main class="main-content">
+        <div class="sidebar">
+            <div class="profile-card">
+                <div class="card-header-pink">
+                    <div class="profile-img"><i class="fa-solid fa-user"></i></div>
+                </div>
+                <div class="profile-info">
+                    <h3><?php echo htmlspecialchars($user_data['name'] ?? 'User'); ?></h3>
+                    <p>Patient ID: #<?php echo $user_id; ?></p>
+                </div>
+            </div>
+
+            <div class="patient-info-box">
+                <h4 style="margin-top:0; font-size:14px; color: #ff85a2;">Upcoming Appointment</h4>
+                <div style="font-size: 13px; color: #777;">
+                    <?php if ($appointment): ?>
+                        <p><i class="fa-calendar"></i> <?php echo $appointment['appointment_date']; ?></p>
+                    <?php else: ?>
+                        <p>No upcoming visits found.</p>
+                    <?php endif; ?>
+                </div>
+            </div>
         </div>
 
-        <div class="card">
-            <h4><i class="fa-solid fa-info-circle"></i> Appointment Status</h4>
-            <?php if ($appointment): ?>
-                <p><?php echo ucfirst($appointment['status']); ?></p>
-            <?php else: ?>
-                <p>—</p>
-            <?php endif; ?>
+        <div class="history-card">
+            <div class="history-header">
+                <h2>Account Information</h2>
+            </div>
+            
+            <div class="info-row">
+                <span><strong>Full Name:</strong></span>
+                <span><?php echo htmlspecialchars($user_data['name'] ?? 'N/A'); ?></span>
+            </div>
+            <div class="info-row">
+                <span><strong>Email Address:</strong></span>
+                <span><?php echo htmlspecialchars($user_data['email'] ?? 'N/A'); ?></span>
+            </div>
+            <div class="info-row">
+                <span><strong>Account Type:</strong></span>
+                <span><?php echo ucfirst($role); ?></span>
+            </div>
+
+            <br><br>
+            <h3>Medical History</h3>
+            <p class="empty-notice">Medical history records are currently unavailable as the system is being updated.</p>
         </div>
-    </div>
-</main>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-
-<script>
-  // Role display
-  const role = "user";
-  document.querySelectorAll('.admin-menu').forEach(item => {
-    item.style.display = role === "admin" ? "block" : "none";
-  });
-  document.querySelectorAll('.patient-menu').forEach(item => {
-    item.style.display = role === "user" ? "block" : "none";
-  });
-</script>
+    </main>
 
 </body>
 </html>
