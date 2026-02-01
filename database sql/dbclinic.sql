@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jan 18, 2026 at 06:29 PM
+-- Generation Time: Feb 01, 2026 at 11:50 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -31,30 +31,11 @@ CREATE TABLE `appointments` (
   `id` int(11) NOT NULL,
   `user_id` int(11) NOT NULL,
   `dentist_id` int(11) NOT NULL,
-  `service_id` int(11) NOT NULL,
   `appointment_date` date NOT NULL,
   `appointment_time` time NOT NULL,
-  `status` enum('Pending','Confirmed','Completed','Canceled') DEFAULT 'Pending',
+  `status` varchar(50) DEFAULT 'Pending',
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `appointments`
---
-
-INSERT INTO `appointments` (`id`, `user_id`, `dentist_id`, `service_id`, `appointment_date`, `appointment_time`, `status`, `created_at`) VALUES
-(1, 1, 1, 1, '2026-01-20', '09:00:00', 'Canceled', '2026-01-17 16:38:28'),
-(2, 1, 2, 4, '2026-01-22', '10:00:00', 'Canceled', '2026-01-17 16:38:28'),
-(3, 2, 1, 2, '2026-01-21', '11:00:00', 'Pending', '2026-01-17 16:38:28'),
-(4, 1, 1, 1, '2025-12-29', '11:00:00', 'Canceled', '2026-01-17 17:05:34'),
-(5, 1, 1, 2, '2026-01-02', '10:00:00', 'Canceled', '2026-01-17 17:07:58'),
-(6, 1, 2, 1, '2026-01-22', '09:00:00', 'Pending', '2026-01-17 17:23:18'),
-(7, 1, 1, 2, '2026-01-19', '09:00:00', 'Confirmed', '2026-01-17 17:25:28'),
-(8, 1, 1, 0, '2026-01-19', '10:00:00', 'Pending', '2026-01-17 17:42:17'),
-(9, 1, 5, 0, '2026-01-29', '11:00:00', 'Confirmed', '2026-01-17 19:54:40'),
-(10, 1, 6, 0, '2026-01-20', '14:00:00', 'Confirmed', '2026-01-17 19:55:31'),
-(11, 1, 5, 0, '2026-01-21', '13:00:00', 'Confirmed', '2026-01-17 20:05:58'),
-(12, 1, 5, 0, '2026-01-18', '09:00:00', 'Confirmed', '2026-01-17 20:16:08');
 
 -- --------------------------------------------------------
 
@@ -68,61 +49,61 @@ CREATE TABLE `appointment_services` (
   `service_id` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+-- --------------------------------------------------------
+
 --
--- Dumping data for table `appointment_services`
+-- Table structure for table `medical_answers`
 --
 
-INSERT INTO `appointment_services` (`id`, `appointment_id`, `service_id`) VALUES
-(1, 8, 1),
-(2, 9, 1),
-(3, 10, 1),
-(4, 11, 1),
-(5, 12, 1);
+CREATE TABLE `medical_answers` (
+  `id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `question_id` int(11) NOT NULL,
+  `answer` enum('Yes','No') DEFAULT 'No',
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `medical_answers`
+--
+
+INSERT INTO `medical_answers` (`id`, `user_id`, `question_id`, `answer`, `updated_at`) VALUES
+(22, 9, 6, 'Yes', '2026-02-01 22:38:32');
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `dentists`
+-- Table structure for table `medical_history`
 --
 
-CREATE TABLE `dentists` (
+CREATE TABLE `medical_history` (
   `id` int(11) NOT NULL,
-  `name` varchar(100) NOT NULL,
-  `specialization` varchar(100) DEFAULT NULL,
-  `status` enum('Available','Unavailable') DEFAULT 'Available',
-  `email` varchar(100) DEFAULT NULL,
-  `password` varchar(255) DEFAULT NULL
+  `user_id` int(11) NOT NULL,
+  `good_health` varchar(10) DEFAULT NULL,
+  `heart_condition` varchar(10) DEFAULT NULL,
+  `allergies` text DEFAULT NULL,
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `dentists`
---
-
-INSERT INTO `dentists` (`id`, `name`, `specialization`, `status`, `email`, `password`) VALUES
-(5, 'Dr. Smith', 'General Dentistry', 'Available', 'dentist@peterdental.com', '$2y$10$9VEf6ojap.ckHiZGIm/LQeJafY0.y.caSFo7cl.S2fBEe7.Ru0JWy'),
-(6, 'Dr. Johnson', 'Orthodontics', 'Available', 'dentist2@peterdental.com', '$2y$10$fOCyJuY1dH6qZAkXivhl2uIkULKapIkKVip9oUabNcwPhXLX3mA8O');
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `dentist_schedules`
+-- Table structure for table `medical_questions`
 --
 
-CREATE TABLE `dentist_schedules` (
+CREATE TABLE `medical_questions` (
   `id` int(11) NOT NULL,
-  `dentist_id` int(11) NOT NULL,
-  `schedule_date` date NOT NULL,
-  `start_time` time NOT NULL,
-  `end_time` time NOT NULL,
-  `is_off` tinyint(1) DEFAULT 0
+  `question_text` text NOT NULL,
+  `question_type` enum('yes_no','text','checkbox') DEFAULT 'yes_no',
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `dentist_schedules`
+-- Dumping data for table `medical_questions`
 --
 
-INSERT INTO `dentist_schedules` (`id`, `dentist_id`, `schedule_date`, `start_time`, `end_time`, `is_off`) VALUES
-(1, 5, '2026-01-22', '08:06:00', '04:11:00', 1);
+INSERT INTO `medical_questions` (`id`, `question_text`, `question_type`, `created_at`) VALUES
+(6, 'did you drink alcohol ?', 'yes_no', '2026-02-01 22:36:54');
 
 -- --------------------------------------------------------
 
@@ -133,29 +114,7 @@ INSERT INTO `dentist_schedules` (`id`, `dentist_id`, `schedule_date`, `start_tim
 CREATE TABLE `services` (
   `id` int(11) NOT NULL,
   `service_name` varchar(100) NOT NULL,
-  `duration` int(11) NOT NULL COMMENT 'Duration in minutes',
   `price` decimal(10,2) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `services`
---
-
-INSERT INTO `services` (`id`, `service_name`, `duration`, `price`) VALUES
-(1, 'Cleaning', 30, 500.00),
-(2, 'Filling', 45, 1200.00),
-(3, 'Extraction', 60, 2500.00),
-(4, 'Braces Consultation', 60, 2000.00);
-
--- --------------------------------------------------------
-
---
--- Table structure for table `time_slots`
---
-
-CREATE TABLE `time_slots` (
-  `id` int(11) NOT NULL,
-  `slot_time` time NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -170,6 +129,7 @@ CREATE TABLE `users` (
   `email` varchar(100) NOT NULL,
   `contact` varchar(20) DEFAULT NULL,
   `password` varchar(255) NOT NULL,
+  `user_type` varchar(20) DEFAULT 'patient',
   `dental_history` text DEFAULT NULL,
   `last_dental_visit` date DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
@@ -180,10 +140,9 @@ CREATE TABLE `users` (
 -- Dumping data for table `users`
 --
 
-INSERT INTO `users` (`id`, `name`, `email`, `contact`, `password`, `dental_history`, `last_dental_visit`, `created_at`, `reset_token`) VALUES
-(1, 'test', 'test@gmail.com', 'asdasdasd', '$2y$10$VKsSwNjSOopeU/Xx5xN.qORoSE1KhzlV5WJHgsMvRikmBP3QOTD0a', 'asdasdasdasd', '2026-01-20', '2026-01-13 20:19:24', NULL),
-(2, 'asd', 'asdasdasasdd@gmail.com', NULL, '$2y$10$18Jf/hrvje7HovF8ZOVZWuBzkQSPuC3nNyfCKZ4DJYBcbgJhvcgJy', NULL, NULL, '2026-01-15 11:46:33', NULL),
-(4, 'jaysonbernante', 'jaysongame27@gmail.com', NULL, '$2y$10$ghpHZvjG7bf2gtltVMmA7uW.vGj28TwaAtZCmfYkBpJHyhRT13sM2', NULL, NULL, '2026-01-15 13:28:24', NULL);
+INSERT INTO `users` (`id`, `name`, `email`, `contact`, `password`, `user_type`, `dental_history`, `last_dental_visit`, `created_at`, `reset_token`) VALUES
+(8, 'test', 'test@gmail.com', NULL, '$2y$10$Y5oIVvUAqdBdKUS3lx5FvOL84/xmuhyht1UblacWX8CuhSr7.fyxO', 'patient', NULL, NULL, '2026-02-01 10:06:26', 'e8531abe16cdd780e6ab2ddcf7ae423ce2fa104b970dd08a30d15da7f3da7c4932f9be7d3c7a01daae5b9db500a0b0db4251'),
+(9, 'asdasd', 'asdasdasd@gmail.com', NULL, '$2y$10$2zVcEjV77i/EDq7uug8VxOeJ4NHzBoLeEnauUs3w.zJFei1E5mnje', 'patient', NULL, NULL, '2026-02-01 14:24:40', NULL);
 
 -- --------------------------------------------------------
 
@@ -194,6 +153,18 @@ INSERT INTO `users` (`id`, `name`, `email`, `contact`, `password`, `dental_histo
 CREATE TABLE `users_managent` (
   `id` int(11) NOT NULL,
   `name` varchar(100) NOT NULL,
+  `first_name` varchar(100) DEFAULT NULL,
+  `middle_name` varchar(100) DEFAULT NULL,
+  `last_name` varchar(100) DEFAULT NULL,
+  `birthday` date DEFAULT NULL,
+  `mobile_number` varchar(20) DEFAULT NULL,
+  `gender` enum('Male','Female','Other') DEFAULT NULL,
+  `address` text DEFAULT NULL,
+  `position` varchar(100) DEFAULT NULL,
+  `remarks` text DEFAULT NULL,
+  `profile_pix` varchar(255) DEFAULT 'default_profile.png',
+  `reset_token` varchar(255) DEFAULT NULL,
+  `reset_expiry` datetime DEFAULT NULL,
   `email` varchar(100) NOT NULL,
   `password` varchar(255) NOT NULL,
   `role` enum('admin','staff') DEFAULT 'staff',
@@ -204,9 +175,9 @@ CREATE TABLE `users_managent` (
 -- Dumping data for table `users_managent`
 --
 
-INSERT INTO `users_managent` (`id`, `name`, `email`, `password`, `role`, `created_at`) VALUES
-(7, 'Admin User', 'admin@peterdental.com', '$2y$10$LsZOI8d1Bm2zGxhAS04dX.boL4NDyp57nq93HXKt0kP7.724QJrWa', 'admin', '2026-01-17 18:46:11'),
-(9, 'staff', 'staff@peterdental.com', '$2y$10$GadZFud3gUsOUICq/vLQoewpEFiXym.2ckZoN5WQsXmlMuF/djYgi', 'staff', '2026-01-17 19:42:16');
+INSERT INTO `users_managent` (`id`, `name`, `first_name`, `middle_name`, `last_name`, `birthday`, `mobile_number`, `gender`, `address`, `position`, `remarks`, `profile_pix`, `reset_token`, `reset_expiry`, `email`, `password`, `role`, `created_at`) VALUES
+(7, 'Admin User', 'peterdental', 'v', 'peter', '2000-06-23', '09887867', 'Male', 'asdasdasdasdasd', NULL, NULL, 'user_7_1769984129.png', 'c375e7fdba0bc52e5602ed1f71f1159780b90e58d5834a6fc54579e724d35eada472c8da646f19dbc7640a63f9f8edac039d', NULL, 'jaysongame27@gmail.com', '$2y$10$SzcMSXdxENsjurWsacMBPuEyy0p9zeyfx6338/peD5HavkjFnbnR2', 'admin', '2026-01-17 18:46:11'),
+(9, 'staff', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'default_profile.png', NULL, NULL, 'staff@peterdental.com', '$2y$10$GadZFud3gUsOUICq/vLQoewpEFiXym.2ckZoN5WQsXmlMuF/djYgi', 'staff', '2026-01-17 19:42:16');
 
 --
 -- Indexes for dumped tables
@@ -216,43 +187,38 @@ INSERT INTO `users_managent` (`id`, `name`, `email`, `password`, `role`, `create
 -- Indexes for table `appointments`
 --
 ALTER TABLE `appointments`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `dentist_id` (`dentist_id`,`appointment_date`,`appointment_time`);
+  ADD PRIMARY KEY (`id`);
 
 --
 -- Indexes for table `appointment_services`
 --
 ALTER TABLE `appointment_services`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `appointment_id` (`appointment_id`),
-  ADD KEY `service_id` (`service_id`);
+  ADD PRIMARY KEY (`id`);
 
 --
--- Indexes for table `dentists`
+-- Indexes for table `medical_answers`
 --
-ALTER TABLE `dentists`
+ALTER TABLE `medical_answers`
   ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `email` (`email`);
+  ADD UNIQUE KEY `user_question` (`user_id`,`question_id`);
 
 --
--- Indexes for table `dentist_schedules`
+-- Indexes for table `medical_history`
 --
-ALTER TABLE `dentist_schedules`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `dentist_id` (`dentist_id`);
+ALTER TABLE `medical_history`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `medical_questions`
+--
+ALTER TABLE `medical_questions`
+  ADD PRIMARY KEY (`id`);
 
 --
 -- Indexes for table `services`
 --
 ALTER TABLE `services`
   ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `time_slots`
---
-ALTER TABLE `time_slots`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `slot_time` (`slot_time`);
 
 --
 -- Indexes for table `users`
@@ -276,66 +242,49 @@ ALTER TABLE `users_managent`
 -- AUTO_INCREMENT for table `appointments`
 --
 ALTER TABLE `appointments`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `appointment_services`
 --
 ALTER TABLE `appointment_services`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT for table `dentists`
+-- AUTO_INCREMENT for table `medical_answers`
 --
-ALTER TABLE `dentists`
+ALTER TABLE `medical_answers`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
+
+--
+-- AUTO_INCREMENT for table `medical_history`
+--
+ALTER TABLE `medical_history`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `medical_questions`
+--
+ALTER TABLE `medical_questions`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
-
---
--- AUTO_INCREMENT for table `dentist_schedules`
---
-ALTER TABLE `dentist_schedules`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `services`
 --
 ALTER TABLE `services`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
-
---
--- AUTO_INCREMENT for table `time_slots`
---
-ALTER TABLE `time_slots`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT for table `users_managent`
 --
 ALTER TABLE `users_managent`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
-
---
--- Constraints for dumped tables
---
-
---
--- Constraints for table `appointment_services`
---
-ALTER TABLE `appointment_services`
-  ADD CONSTRAINT `appointment_services_ibfk_1` FOREIGN KEY (`appointment_id`) REFERENCES `appointments` (`id`),
-  ADD CONSTRAINT `appointment_services_ibfk_2` FOREIGN KEY (`service_id`) REFERENCES `services` (`id`);
-
---
--- Constraints for table `dentist_schedules`
---
-ALTER TABLE `dentist_schedules`
-  ADD CONSTRAINT `dentist_schedules_ibfk_1` FOREIGN KEY (`dentist_id`) REFERENCES `dentists` (`id`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
