@@ -18,8 +18,8 @@ if (!isset($connect)) {
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['email'])) {
     $email = trim($_POST['email']);
 
-    // Check users_managent table
-    $stmt = $connect->prepare("SELECT first_name, last_name FROM users_managent WHERE email = ? LIMIT 1");
+    // Check users_management table
+    $stmt = $connect->prepare("SELECT first_name, last_name FROM users_management WHERE email = ? LIMIT 1");
     $stmt->bind_param("s", $email);
     $stmt->execute();
     $result = $stmt->get_result();
@@ -30,7 +30,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['email'])) {
         $token = bin2hex(random_bytes(50));
 
         // Save token in database
-        $stmt2 = $connect->prepare("UPDATE users_managent SET reset_token = ? WHERE email = ?");
+        $stmt2 = $connect->prepare("UPDATE users_management SET reset_token = ? WHERE email = ?");
         $stmt2->bind_param("ss", $token, $email);
         
         if ($stmt2->execute()) {

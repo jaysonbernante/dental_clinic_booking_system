@@ -34,7 +34,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_SESSION['user_id'])) {
         if (move_uploaded_file($_FILES["profile_photo"]["tmp_name"], $target_file)) {
             
             // Update database
-            $sql = "UPDATE users_managent SET profile_pix = ? WHERE id = ?";
+            $sql = "UPDATE users_management SET profile_pix = ? WHERE id = ?";
             $stmt = $conn->prepare($sql);
             $stmt->bind_param("si", $new_filename, $user_id);
             
@@ -59,7 +59,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_SESSION['user_id'])) {
         $gender = $_POST['gender'];
         $address = $_POST['address'];
 
-        $sql = "UPDATE users_managent SET 
+        $sql = "UPDATE users_management SET 
                 first_name = ?, 
                 middle_name = ?, 
                 last_name = ?, 

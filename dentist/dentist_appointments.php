@@ -1,17 +1,44 @@
 <?php
 session_start();
-if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] === 'patient') {
+
+// 1. Security Check
+if (!isset($_SESSION['user_id']) || ($_SESSION['user_type'] !== 'admin' && $_SESSION['user_type'] !== 'staff')) {
     header("Location: ../login.php");
     exit();
 }
+
+// 2. Include Connection
 include '../action/connection.php';
-$admin_name = $_SESSION['user_name'];
+
+// Fix connection variable if necessary
+if (!isset($conn)) {
+    if (isset($connect)) { $conn = $connect; }
+    elseif (isset($con)) { $conn = $con; }
+    else { die("Database connection failed."); }
+}
+
+$user_id = $_SESSION['user_id'];
+
+// 3. FETCH USER DATA (This is what was missing!)
+$user_query = "SELECT * FROM users_management WHERE id = '$user_id'";
+$user_result = mysqli_query($conn, $user_query);
+
+if ($user_result && mysqli_num_rows($user_result) > 0) {
+    $user_data = mysqli_fetch_assoc($user_result);
+} else {
+    // Fallback if user not found
+    $user_data = ['first_name' => 'User', 'last_name' => 'Name', 'email' => ''];
+}
+
+// 4. Define variables used in the component
+$profile_img = !empty($user_data['profile_pix']) 
+               ? "../uploads/profile_pics/" . $user_data['profile_pix'] 
+               : "https://via.placeholder.com/150";
 
 // Logic for active tab
 $tab = $_GET['tab'] ?? 'requests';
 $subtab = $_GET['sub'] ?? 'pending';
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -42,12 +69,8 @@ $subtab = $_GET['sub'] ?? 'pending';
         .nav-item:hover, .nav-item.active { background: rgba(255, 255, 255, 0.2); border-left: 4px solid white; }
 
         /* --- Main Content --- */
-        .main-container { margin-left: var(--sidebar-width); flex: 1; padding: 20px; transition: var(--transition); width: 100%; }
+        .main-container { margin-left: var(--sidebar-width); flex: 1; padding: 0 20px 20px; width: calc(100% - var(--sidebar-width)); }
 
-        /* --- Header Top --- */
-        .header-top { display: flex; justify-content: space-between; align-items: center; background: white; padding: 12px 20px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
-        .header-left { display: flex; align-items: center; gap: 12px; }
-        .burger-btn { display: none; background: none; border: none; font-size: 22px; color: var(--peter-pink); cursor: pointer; }
 
         /* --- Navigation Tabs --- */
         .tabs-nav { display: flex; gap: 10px; margin-bottom: 20px; }
@@ -90,33 +113,16 @@ $subtab = $_GET['sub'] ?? 'pending';
 </head>
 <body>
 
-    <nav class="sidebar">
-        <div class="sidebar-header">
-            <div class="logo-circle"><img src="../assets/brand/logo.JPG"></div>
-            <h3 style="margin:0;">Peter Dental</h3>
-        </div>
-        <div class="nav-menu">
-            <a href="dentist_dashboard.php" class="nav-item "><i class="fa-solid fa-house"></i> Home</a>
-            <a href="dentist_patient.php" class="nav-item"><i class="fa-solid fa-user-group"></i> Patients</a>
-            <a href="dentist_appointments.php" class="nav-item active"><i class="fa-solid fa-calendar-days"></i> Appointments</a>
-            <a href="dentist_Medical_Records.php" class="nav-item"><i class="fa-solid fa-clipboard-list"></i> Medical Questions</a>
-            <a href="#" class="nav-item"><i class="fa-solid fa-gear"></i> Admin Settings</a>
-        </div>
-    </nav>
+    <?php
+         
+         include '../component/sideBar_dentist.php'; 
+         ?>
 
     <div class="main-container">
-        <header class="header-top">
-            <div class="header-left">
-                <button class="burger-btn" onclick="toggleSidebar()">
-                    <i class="fa-solid fa-bars"></i>
-                </button>
-                <h4 style="margin:0; color: #333;">Appointments</h4>
-            </div>
-            <div class="header-right" style="display:flex; align-items:center; gap:10px;">
-                <span style="font-size:12px; font-weight:600; color:var(--peter-pink)">Dr. <?php echo $admin_name; ?></span>
-                <div style="width:30px; height:30px; border-radius:50%; background:#ddd;"></div>
-            </div>
-        </header>
+         <?php
+         $pageTitle = "Appointments";
+         include '../component/headerTop_dentist.php'; 
+         ?>
 
         <div class="tabs-nav">
             <a href="?tab=requests" class="tab-btn <?php echo $tab == 'requests' ? 'active' : ''; ?>">Requests</a>

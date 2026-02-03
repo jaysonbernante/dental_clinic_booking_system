@@ -28,23 +28,14 @@ $result = $connect->query($query);
     <style>
         :root {
             --peter-pink: #ff6b9d;
-            --peter-blue: #0081C9; /* Your new color */
+            --peter-blue: #0081C9;
             --sidebar-width: 260px;
             --bg-light: #fff5f8;
         }
 
         body { font-family: 'Poppins', sans-serif; margin: 0; background-color: var(--bg-light); display: flex; }
 
-        /* --- Sidebar --- */
-        .sidebar { width: var(--sidebar-width); background-color: var(--peter-pink); height: 100vh; color: white; position: fixed; left: 0; top: 0; z-index: 1100; transition: var(--transition); padding-top: 30px; }
-        .sidebar-header { text-align: center; margin-bottom: 30px; }
-        .logo-circle { width: 80px; height: 80px; background: white; border-radius: 50%; margin: 0 auto 10px; overflow: hidden; border: 3px solid rgba(255,255,255,0.3); }
-        .logo-circle img { width: 100%; height: 100%; object-fit: cover; }
-        
-        .nav-menu { list-style: none; padding: 0; }
-        .nav-item { padding: 15px 25px; display: flex; align-items: center; gap: 12px; color: white; text-decoration: none; font-size: 14px; transition: var(--transition); }
-        .nav-item:hover, .nav-item.active { background: rgba(255, 255, 255, 0.2); border-left: 4px solid white; }
-
+       
         /* Main Content */
         .main-container { margin-left: var(--sidebar-width); flex: 1; padding: 30px; width: calc(100% - var(--sidebar-width)); }
         
@@ -69,32 +60,24 @@ $result = $connect->query($query);
         .form-group label { display: block; font-size: 13px; margin-bottom: 5px; color: #666; }
         .form-group input { width: 100%; padding: 10px; border: 1px solid #eee; border-radius: 8px; box-sizing: border-box; }
         
-        /* Toast Customization using your Blue color */
+        /* Toast Customization */
         .toast-success { background: var(--peter-blue) !important; box-shadow: 0 5px 15px rgba(0, 129, 201, 0.3); border-radius: 8px; }
         .toast-error { background: #ff6b6b !important; box-shadow: 0 5px 15px rgba(255, 107, 107, 0.3); border-radius: 8px; }
     </style>
 </head>
 <body>
 
-    <nav class="sidebar">
-        <div class="sidebar-header">
-            <div class="logo-circle"><img src="../assets/brand/logo.JPG"></div>
-            <h3 style="margin:0;">Peter Dental</h3>
-        </div>
-        <div class="nav-menu">
-            <a href="dentist_dashboard.php" class="nav-item "><i class="fa-solid fa-house"></i> Home</a>
-            <a href="dentist_patient.php" class="nav-item"><i class="fa-solid fa-user-group"></i> Patients</a>
-            <a href="dentist_appointments.php" class="nav-item "><i class="fa-solid fa-calendar-days"></i> Appointments</a>
-            <a href="dentist_Medical_Records.php" class="nav-item active"><i class="fa-solid fa-clipboard-list"></i> Medical Questions</a>
-            <a href="#" class="nav-item"><i class="fa-solid fa-gear"></i> Admin Settings</a>
-        </div>
-    </nav>
+    <?php
+         
+         include '../component/sideBar_dentist.php'; 
+         ?>
 
     <div class="main-container">
-        <header class="header-top">
-            <h2 style="margin:0; font-size:18px;">Manage Medical Questions</h2>
-            <span style="color: var(--peter-pink); font-weight: 600;">Dr. <?php echo htmlspecialchars($admin_name); ?></span>
-        </header>
+
+        <?php
+         $pageTitle = "Manage Medical Questions";
+         include '../component/headerTop_dentist.php'; 
+         ?>
 
         <button class="btn-add" onclick="openAddModal()">
             <i class="fa-solid fa-plus"></i> Add New Question
@@ -149,91 +132,96 @@ $result = $connect->query($query);
                 
                 <div style="display: flex; gap: 10px; margin-top: 20px;">
                     <button type="submit" class="btn-add" style="flex:1; margin-bottom:0;">Save Question</button>
-                    <button type="button" onclick="closeModal()" style="flex:1; background:#eee; border:none; border-radius:10px; cursor:pointer; color:#777;">Cancel</button>
+                    <button type="button" onclick="closeQuestionModal()">Cancel</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
-    <script>
-    const modal = document.getElementById('qModal');
-    const qForm = modal.querySelector('form');
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+<script>
+const modal = document.getElementById('qModal');
+const qForm = modal.querySelector('form');
 
-    // Helper to show Toastify - UPDATED TO TOP RIGHT
-    function showToast(msg, status) {
-        let colorClass = (status === 'duplicate' || status === 'error') ? "toast-error" : "toast-success";
-        Toastify({
-            text: msg,
-            duration: 3000,
-            gravity: "top",      // top or bottom
-            position: "right",   // Changed from left to right
-            className: colorClass,
-            stopOnFocus: true,
-        }).showToast();
-    }
+function showToast(msg, status) {
+    let colorClass = (status === 'duplicate' || status === 'error') ? "toast-error" : "toast-success";
+    Toastify({
+        text: msg,
+        duration: 3000,
+        gravity: "top",
+        position: "right",
+        className: colorClass,
+        stopOnFocus: true,
+    }).showToast();
+}
 
-    function openAddModal() {
-        document.getElementById('modalTitle').innerText = "Add Question";
-        document.getElementById('action_type').value = "add";
-        document.getElementById('q_id').value = "";
-        document.getElementById('question_text').value = "";
-        modal.style.display = "block";
-    }
+function openAddModal() {
+    document.getElementById('modalTitle').innerText = "Add Question";
+    document.getElementById('action_type').value = "add";
+    document.getElementById('q_id').value = "";
+    document.getElementById('question_text').value = "";
+    modal.style.display = "block";
+}
 
-    function openEditModal(id, text) {
-        document.getElementById('modalTitle').innerText = "Edit Question";
-        document.getElementById('action_type').value = "update";
-        document.getElementById('q_id').value = id;
-        document.getElementById('question_text').value = text;
-        modal.style.display = "block";
-    }
+function openEditModal(id, text) {
+    document.getElementById('modalTitle').innerText = "Edit Question";
+    document.getElementById('action_type').value = "update";
+    document.getElementById('q_id').value = id;
+    document.getElementById('question_text').value = text;
+    modal.style.display = "block";
+}
 
-    function closeModal() { modal.style.display = "none"; }
+function closeQuestionModal() {
+    modal.style.display = "none";
+}
 
-    // AJAX FORM SUBMISSION
-    qForm.onsubmit = function(e) {
-        e.preventDefault();
-        const formData = new FormData(qForm);
+// AJAX FORM SUBMISSION
+qForm.onsubmit = function(e) {
+    e.preventDefault();
+    const formData = new FormData(qForm);
 
-        fetch('../action/manage_questions.php', {
-            method: 'POST',
-            body: formData
-        })
+    fetch('../action/manage_questions.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success' || data.status === 'updated') {
+            closeQuestionModal(); // <-- FIXED
+            showToast(data.message, 'success');
+            setTimeout(() => { location.reload(); }, 1000); 
+        } else {
+            showToast(data.message, data.status); 
+        }
+    })
+    .catch(error => {
+        showToast("An error occurred.", "error");
+        console.error('Error:', error);
+    });
+};
+
+// AJAX DELETE
+function confirmDelete(id) {
+    if(confirm("Are you sure you want to delete this question?")) {
+        fetch(`../action/manage_questions.php?delete_id=${id}`)
         .then(response => response.json())
         .then(data => {
-            if (data.status === 'success' || data.status === 'updated') {
-                closeModal();
+            if(data.status === 'deleted') {
                 showToast(data.message, 'success');
-                setTimeout(() => { location.reload(); }, 1000); 
+                setTimeout(() => { location.reload(); }, 1000);
             } else {
-                showToast(data.message, data.status); 
+                showToast(data.message, 'error');
             }
         })
-        .catch(error => {
-            showToast("An error occurred.", "error");
-            console.error('Error:', error);
-        });
-    };
-
-    // AJAX DELETE
-    function confirmDelete(id) {
-        if(confirm("Are you sure you want to delete this question?")) {
-            fetch(`../action/manage_questions.php?delete_id=${id}`)
-            .then(response => response.json())
-            .then(data => {
-                if(data.status === 'deleted') {
-                    showToast(data.message, 'success');
-                    setTimeout(() => { location.reload(); }, 1000);
-                } else {
-                    showToast(data.message, 'error');
-                }
-            })
-            .catch(error => console.error('Error:', error));
-        }
+        .catch(error => console.error('Error:', error));
     }
+}
 
-    window.onclick = function(e) { if(e.target == modal) closeModal(); }
+window.addEventListener('click', function(e) {
+    if (e.target === modal) {
+        closeQuestionModal();
+    }
+});
 </script>
 </body>
 </html>
