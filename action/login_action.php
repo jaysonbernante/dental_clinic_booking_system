@@ -65,16 +65,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $lockout_seconds = strtotime($user['lockout_time']) - strtotime($currentTime);
             $error = "locked"; 
         } 
-        elseif (password_verify($password, $user['password'])) {
-            $connect->query("UPDATE $table SET login_attempts = 0, lockout_time = NULL WHERE id = " . $user['id']);
-            $_SESSION['user_id'] = $user['id'];
-            $_SESSION['user_name'] = $user['name'];
-            $_SESSION['user_type'] = $user['role']; 
-            
-            $redirect = ($table == 'users') ? "patient/patient.php" : "dentist/dentist_dashboard.php";
-            header("Location: $redirect");
-            exit();
-        } 
+        // ... sa loob ng iyong successful login block
+if (password_verify($password, $user['password'])) {
+    $connect->query("UPDATE $table SET login_attempts = 0, lockout_time = NULL WHERE id = " . $user['id']);
+    
+    $_SESSION['user_id'] = $user['id'];
+    $_SESSION['user_name'] = $user['name'];
+    $_SESSION['user_type'] = $user['role']; 
+    
+    // MAGDAGDAG NG SUCCESS FLAG SA SESSION
+    $_SESSION['login_success'] = true;
+
+    $redirect = ($table == 'users') ? "patient/patient_medicalHistory.php" : "dentist/dentist_dashboard.php";
+    header("Location: $redirect");
+    exit();
+}
         else {
             handleFailedAttempt($connect, $table, $email, $user['login_attempts']);
             $new_count = $user['login_attempts'] + 1;

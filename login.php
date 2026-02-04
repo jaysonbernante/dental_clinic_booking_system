@@ -5,86 +5,102 @@ include 'action/connection.php';
 include 'action/login_action.php';
 ?>
 
-<div class="auth-wrapper reveal delay-200">
-  <div class="login-container">
-    <h2 style="color: #ff6b9d; text-align: center; margin-bottom: 25px;">Sign In</h2>
+<div class="auth-wrapper reveal active delay-200">
+    <div class="login-container">
+        <h2>Sign In</h2>
 
-    <div id="auth-alert-container">
-        <?php if ($error === "locked"): ?>
-            <div class="alert alert-danger" id="lockout-timer-msg" style="background: #fff5f5; color: #e53e3e; padding: 12px; border-radius: 8px; margin-bottom: 20px; font-size: 13px; border-left: 4px solid #e53e3e;">
-                <i class="fa-solid fa-clock-rotate-left"></i> Account locked. Please wait <span id="timer" style="font-weight: bold;"><?php echo $lockout_seconds; ?></span> seconds.
-            </div>
-        <?php elseif (!empty($error)): ?>
-            <div class="alert alert-danger" style="background: #fff5f5; color: #e53e3e; padding: 12px; border-radius: 8px; margin-bottom: 20px; font-size: 13px; border-left: 4px solid #e53e3e;">
+        <?php if (!empty($error)): ?>
+            <div class="alert alert-danger">
                 <i class="fa-solid fa-circle-exclamation"></i> <?php echo $error; ?>
             </div>
         <?php endif; ?>
+
+        <form method="POST" action="login.php">
+            <div class="mb-3">
+                <label class="form-label">Email</label>
+                <input type="email" name="email" class="form-control" placeholder="example@mail.com" required>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Password</label>
+                <input type="password" name="password" class="form-control" required>
+            </div>
+
+            <div style="text-align: center; margin-bottom: 15px;">
+                <a href="forgot_password.php" style=" font-size: 12px; color: #666; text-decoration: none;">
+                    Forgot password? <span style="margin-left:5px;">&rarr;</span>
+                </a>
+            </div>
+
+            <button type="submit" class="btn-submit">Login</button>
+            
+            <div style="text-align: center; margin-top: 20px;">
+                <span style="font-size: 13px; color: #777;">Don't have an account? </span>
+                <a href="register.php" style="color: #ff6b9d; text-decoration: none; font-weight: 600;">Sign Up</a>
+            </div>
+        </form>
     </div>
-
-    <form method="POST" action="login.php" id="loginForm">
-      <div class="mb-3">
-        <label for="email" class="form-label" style="font-size: 13px; font-weight: 600; color: #444;">Email</label>
-        <input type="email" name="email" class="form-control" id="email" required 
-               style="border-radius: 8px; padding: 12px;"
-               <?php echo ($error === "locked") ? 'disabled' : ''; ?>>
-      </div>
-
-      <div class="mb-3">
-        <label for="password" class="form-label" style="font-size: 13px; font-weight: 600; color: #444;">Password</label>
-        <input type="password" name="password" class="form-control" id="password" required 
-               style="border-radius: 8px; padding: 12px;"
-               <?php echo ($error === "locked") ? 'disabled' : ''; ?>>
-      </div>
-
-      <div class="log-button">
-        <a class="forgot" href="forgot_password.php" style="font-size: 12px; color: #666; text-decoration: none;">Forgot password?</a>
-        
-        <button type="submit" id="loginBtn" class="btn btn-primary w-100 mb-3" 
-                style="background: #ff6b9d; border: none; padding: 12px; border-radius: 8px; font-weight: 600; margin-top: 15px;"
-                <?php echo ($error === "locked") ? 'disabled' : ''; ?>>
-            Login
-        </button>
-        
-        <div style="text-align: center; margin-top: 10px;">
-            <span style="font-size: 13px; color: #777;">Don't have an account? </span>
-            <a href="register.php" style="color: #ff6b9d; font-size: 13px; font-weight: 600; text-decoration: none;">Sign Up</a>
-        </div>
-      </div>
-    </form>
-  </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-// Live Countdown Logic
-const timerSpan = document.getElementById('timer');
-const loginBtn = document.getElementById('loginBtn');
-const inputs = document.querySelectorAll('#loginForm input');
-const alertBox = document.getElementById('lockout-timer-msg');
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('status') === 'success') {
+        const Toast = Swal.mixin({
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 3000,
+            timerProgressBar: true
+        });
 
-if (timerSpan) {
-    let seconds = parseInt(timerSpan.innerText);
-    
-    const interval = setInterval(() => {
-        seconds--;
-        
-        if (seconds <= 0) {
-            clearInterval(interval);
-            // Switch to Success Styling
-            alertBox.style.background = "#f0fff4";
-            alertBox.style.color = "#38a169";
-            alertBox.style.borderLeft = "4px solid #38a169";
-            alertBox.innerHTML = "<i class='fa-solid fa-circle-check'></i> Security lockout lifted. You can login again.";
-            
-            // Re-enable Form
-            loginBtn.disabled = false;
-            inputs.forEach(input => input.disabled = false);
+        Toast.fire({
+            icon: 'success',
+            title: 'Registration Successful!',
+            text: 'You can now sign in.',
+            iconColor: '#ff6b9d',
+        });
+        // Linisin ang URL para hindi paulit-ulit ang toast
+        window.history.replaceState({}, document.title, window.location.pathname);
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+    // Kuhanin ang error mula sa PHP variable
+    const loginError = "<?php echo $error; ?>";
+    const isLocked = "<?php echo ($error === 'locked' || $lockout_seconds > 0) ? 'true' : 'false'; ?>";
+
+    if (loginError && loginError !== "") {
+        const Toast = Swal.mixin({
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 4000,
+            timerProgressBar: true,
+            didOpen: (toast) => {
+                toast.addEventListener('mouseenter', Swal.stopTimer)
+                toast.addEventListener('mouseleave', Swal.resumeTimer)
+            }
+        });
+
+        // Kung locked, pwedeng mas seryosong kulay (Warning)
+        if (loginError.includes("locked") || isLocked === 'true') {
+            Toast.fire({
+                icon: 'warning',
+                title: 'Account Locked',
+                text: 'Please try again later.',
+                iconColor: '#f39c12'
+            });
         } else {
-            timerSpan.innerText = seconds;
+            // Normal login error (Incorrect password / User not found)
+            Toast.fire({
+                icon: 'error',
+                title: 'Login Failed',
+                text: loginError,
+                iconColor: '#ff6b9d' // Pink theme
+            });
         }
-    }, 1000);
-}
+    }
+});
 </script>
 
-<?php
-include 'component/index_bottom.php';
-?>
+<?php include 'component/index_bottom.php'; ?>

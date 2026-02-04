@@ -1,7 +1,7 @@
 <?php 
 
 
-// 1. Security Check
+
 if (!isset($_SESSION['user_id']) || ($_SESSION['user_type'] !== 'admin' && $_SESSION['user_type'] !== 'staff')) {
     header("Location: ../login.php");
     exit();
@@ -310,6 +310,8 @@ $profile_img = !empty($user_data['profile_pix'])
 </div>
 
 <script>
+
+    
     function toggleDropdown(e) {
         e.stopPropagation();
         const dd = document.getElementById('profileDropdown');
