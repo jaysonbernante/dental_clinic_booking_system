@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Feb 04, 2026 at 04:10 AM
+-- Generation Time: Feb 03, 2026 at 11:11 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -33,37 +33,9 @@ CREATE TABLE `appointments` (
   `dentist_id` int(11) NOT NULL,
   `appointment_date` date NOT NULL,
   `appointment_time` time NOT NULL,
-  `address` text DEFAULT NULL,
-  `birthday` date DEFAULT NULL,
-  `gender` varchar(10) DEFAULT NULL,
-  `contact_number` varchar(20) DEFAULT NULL,
-  `reason` varchar(255) DEFAULT NULL,
-  `remarks` text DEFAULT NULL,
   `status` varchar(50) DEFAULT 'Pending',
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  `is_read` tinyint(1) DEFAULT 0
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `appointments`
---
-
-INSERT INTO `appointments` (`id`, `user_id`, `dentist_id`, `appointment_date`, `appointment_time`, `address`, `birthday`, `gender`, `contact_number`, `reason`, `remarks`, `status`, `created_at`, `updated_at`, `is_read`) VALUES
-(1, 9, 7, '2026-02-05', '08:00:00', 'asdasdasdasdasd', '2026-02-03', 'Male', '098765434222', 'Cleaning', 'madumi', 'Deferred', '2026-02-03 10:22:12', '2026-02-04 02:10:48', 1),
-(2, 9, 7, '2026-02-05', '08:00:00', 'asdasdasdasdasdasd', '2026-02-03', 'Male', '098765434222', 'Cleaning', 'asdasd', 'Deferred', '2026-02-03 10:57:40', '2026-02-04 02:10:48', 1),
-(3, 9, 7, '2026-02-03', '08:00:00', 'asdasdasdasdasdasd', '2026-02-03', 'Female', '098765434222', 'Cleaning', 'asdasd', 'Confirmed', '2026-02-03 11:52:08', '2026-02-04 02:41:50', 1),
-(4, 9, 7, '2026-02-12', '08:00:00', 'asdasdasdasdasdasd', '2026-02-12', 'Female', '098765434222', 'Cleaning', 'sdfsdf', 'Confirmed', '2026-02-03 12:52:34', '2026-02-04 02:10:53', 1),
-(5, 9, 7, '2026-02-03', '09:00:00', 'asdasdasdasdasdasd', '2026-02-03', 'Female', '098765434222', 'Cleaning', 'asdasd', 'Completed', '2026-02-03 12:54:18', '2026-02-04 02:13:06', 1),
-(6, 9, 7, '2026-02-12', '09:00:00', 'asdasdasdasdasdasd', '2026-02-11', 'Female', '098765434222', 'Cleaning', 'asdasd', 'Confirmed', '2026-02-03 12:54:49', '2026-02-04 02:42:00', 1),
-(7, 9, 7, '2026-02-03', '10:00:00', 'asdasdasdasdasdasd', '2026-02-12', 'Male', '098765434222', 'Cleaning', 'asdasd', 'Deferred', '2026-02-03 12:56:36', '2026-02-04 02:13:28', 1),
-(8, 8, 7, '2026-02-03', '13:00:00', 'asdasdasdasdasdasd', '2026-02-19', 'Male', '098765434222', 'Cleaning', 'asdasd', 'Confirmed', '2026-02-03 14:24:49', '2026-02-04 02:41:53', 1),
-(9, 8, 7, '2026-02-03', '11:00:00', 'asdasdasdasdasdasd', '2026-02-04', 'Female', '098765434222', 'Cleaning', 'asdasdasd', 'Deferred', '2026-02-03 14:29:19', '2026-02-04 02:10:48', 1),
-(10, 8, 7, '2026-02-03', '14:00:00', 'asdasdasdasdasdasd', '2026-02-11', 'Female', '098765434222', 'Cleaning', 'asdasdasd', 'Confirmed', '2026-02-03 14:39:52', '2026-02-04 02:41:56', 1),
-(11, 8, 7, '2026-02-12', '10:00:00', 'asdasdasdasdasdasd', '2026-02-03', 'Female', '098765434222', 'Cleaning', 'asdasd', 'Deferred', '2026-02-03 15:35:28', '2026-02-04 02:10:48', 1),
-(12, 9, 7, '2026-03-05', '09:00:00', 'asdasdasdasdasdasd', '2026-02-04', 'Male', '098765434222', 'Cleaning', 'asdasd', 'Deferred', '2026-02-04 02:11:31', '2026-02-04 02:13:35', 1),
-(13, 9, 7, '2026-02-24', '10:00:00', 'asdasdasdasdasdasd', '2026-02-19', 'Female', '098765434222', 'Cleaning', '', 'Confirmed', '2026-02-04 02:21:40', '2026-02-04 02:41:09', 1),
-(14, 9, 7, '2026-02-20', '09:00:00', 'asdasdasdasdasdasd', '2026-02-04', 'Female', '098765434222', 'Cleaning', 'asdasd', 'Deferred', '2026-02-04 02:22:32', '2026-02-04 02:23:12', 1);
 
 -- --------------------------------------------------------
 
@@ -76,29 +48,6 @@ CREATE TABLE `appointment_services` (
   `appointment_id` int(11) NOT NULL,
   `service_id` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `disabled_dates`
---
-
-CREATE TABLE `disabled_dates` (
-  `id` int(11) NOT NULL,
-  `disabled_date` date NOT NULL,
-  `reason` varchar(255) DEFAULT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `disabled_dates`
---
-
-INSERT INTO `disabled_dates` (`id`, `disabled_date`, `reason`, `created_at`) VALUES
-(12, '2026-02-11', 'Admin Set Day-Off', '2026-02-04 03:00:05'),
-(13, '2026-02-10', 'Admin Set Day-Off', '2026-02-04 03:00:07'),
-(14, '2026-02-09', 'Admin Set Day-Off', '2026-02-04 03:00:08'),
-(15, '2026-02-08', 'Admin Set Day-Off', '2026-02-04 03:00:09');
 
 -- --------------------------------------------------------
 
@@ -129,15 +78,12 @@ INSERT INTO `medical_answers` (`id`, `user_id`, `question_id`, `answer`, `update
 (29, 13, 10, 'Yes', '2026-02-03 05:47:53'),
 (30, 13, 11, 'Yes', '2026-02-03 05:46:38'),
 (31, 13, 12, 'No', '2026-02-03 05:44:40'),
-(44, 9, 10, 'Yes', '2026-02-03 12:52:15'),
+(44, 9, 10, 'No', '2026-02-03 09:07:34'),
 (45, 9, 11, 'Yes', '2026-02-03 06:10:41'),
 (46, 9, 12, 'Yes', '2026-02-03 06:10:41'),
 (47, 14, 10, 'No', '2026-02-03 05:51:26'),
 (48, 14, 11, 'No', '2026-02-03 05:51:26'),
-(49, 14, 12, 'No', '2026-02-03 05:51:26'),
-(50, 8, 10, 'Yes', '2026-02-03 14:24:16'),
-(51, 8, 11, 'No', '2026-02-03 14:24:16'),
-(52, 8, 12, 'No', '2026-02-03 14:24:16');
+(49, 14, 12, 'No', '2026-02-03 05:51:26');
 
 -- --------------------------------------------------------
 
@@ -199,7 +145,6 @@ CREATE TABLE `users` (
   `name` varchar(100) NOT NULL,
   `email` varchar(100) NOT NULL,
   `contact` varchar(20) DEFAULT NULL,
-  `address` varchar(255) DEFAULT NULL,
   `password` varchar(255) NOT NULL,
   `user_type` varchar(20) DEFAULT 'patient',
   `dental_history` text DEFAULT NULL,
@@ -217,12 +162,10 @@ CREATE TABLE `users` (
 -- Dumping data for table `users`
 --
 
-INSERT INTO `users` (`id`, `name`, `email`, `contact`, `address`, `password`, `user_type`, `dental_history`, `last_dental_visit`, `created_at`, `reset_token`, `lockout_time`, `reset_token_expires`, `login_attempts`, `gender`, `birthday`) VALUES
-(8, 'test', '', '098765434222', 'asdasd', '$2y$10$Y5oIVvUAqdBdKUS3lx5FvOL84/xmuhyht1UblacWX8CuhSr7.fyxO', 'patient', NULL, NULL, '2026-02-01 10:06:26', '1efd960144db6a229dccb358e0a849b62986b91c0a9955f3ebcdd6445dec23c7625a9c91f3cbf326732c8567b94a3b01ea76', NULL, '2026-02-02 15:12:07', 0, 'Male', '2026-02-03'),
-(9, 'asdasd', 'asdasdasd@gmail.com', '098765434222', 'asdasdasd', '$2y$10$2zVcEjV77i/EDq7uug8VxOeJ4NHzBoLeEnauUs3w.zJFei1E5mnje', 'patient', NULL, NULL, '2026-02-01 14:24:40', NULL, NULL, NULL, 0, 'Male', '2026-02-04'),
-(15, 'patient1 patient1', 'patient1@gmail.com', '098765434222', NULL, '$2y$10$IwDUpTQoBN2b4y62mBHlk.8t6d1W.rQnSvybFa094Ee6n1qgHtDXK', 'patient', 'asdasd', NULL, '2026-02-03 05:51:45', NULL, NULL, NULL, 0, 'Female', '2026-02-03'),
-(16, 'Jayson.Org', 'test1@gmail.com', NULL, NULL, '$2y$10$GddCobqfGej0K.8zfQN6R.axGqf7DoMvzMSQf87ha.cDSYkj07c46', 'patient', NULL, NULL, '2026-02-03 14:15:52', NULL, NULL, NULL, 0, NULL, NULL),
-(17, 'asdasd', 'asdasdasdasd@gmail.com', NULL, NULL, '$2y$10$k6xI5O5LTErJAeqV8Pm4EOG8GX3mEUh00hYHVDg03tyYJ3kt04Bo6', 'patient', NULL, NULL, '2026-02-03 14:18:22', NULL, NULL, NULL, 0, NULL, NULL);
+INSERT INTO `users` (`id`, `name`, `email`, `contact`, `password`, `user_type`, `dental_history`, `last_dental_visit`, `created_at`, `reset_token`, `lockout_time`, `reset_token_expires`, `login_attempts`, `gender`, `birthday`) VALUES
+(8, 'test', 'test@gmail.com', NULL, '$2y$10$Y5oIVvUAqdBdKUS3lx5FvOL84/xmuhyht1UblacWX8CuhSr7.fyxO', 'patient', NULL, NULL, '2026-02-01 10:06:26', '1efd960144db6a229dccb358e0a849b62986b91c0a9955f3ebcdd6445dec23c7625a9c91f3cbf326732c8567b94a3b01ea76', NULL, '2026-02-02 15:12:07', 2, NULL, NULL),
+(9, 'asdasd', 'asdasdasd@gmail.com', NULL, '$2y$10$2zVcEjV77i/EDq7uug8VxOeJ4NHzBoLeEnauUs3w.zJFei1E5mnje', 'patient', NULL, NULL, '2026-02-01 14:24:40', NULL, NULL, NULL, 0, NULL, NULL),
+(15, 'patient1 patient1', 'patient1@gmail.com', '098765434222', '$2y$10$IwDUpTQoBN2b4y62mBHlk.8t6d1W.rQnSvybFa094Ee6n1qgHtDXK', 'patient', 'asdasd', NULL, '2026-02-03 05:51:45', NULL, NULL, NULL, 0, 'Female', '2026-02-03');
 
 -- --------------------------------------------------------
 
@@ -278,13 +221,6 @@ ALTER TABLE `appointment_services`
   ADD PRIMARY KEY (`id`);
 
 --
--- Indexes for table `disabled_dates`
---
-ALTER TABLE `disabled_dates`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `disabled_date` (`disabled_date`);
-
---
 -- Indexes for table `medical_answers`
 --
 ALTER TABLE `medical_answers`
@@ -331,7 +267,7 @@ ALTER TABLE `users_management`
 -- AUTO_INCREMENT for table `appointments`
 --
 ALTER TABLE `appointments`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `appointment_services`
@@ -340,16 +276,10 @@ ALTER TABLE `appointment_services`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT for table `disabled_dates`
---
-ALTER TABLE `disabled_dates`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
-
---
 -- AUTO_INCREMENT for table `medical_answers`
 --
 ALTER TABLE `medical_answers`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=53;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=50;
 
 --
 -- AUTO_INCREMENT for table `medical_history`
@@ -373,7 +303,7 @@ ALTER TABLE `services`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
 -- AUTO_INCREMENT for table `users_management`

@@ -30,9 +30,10 @@ function getAppointments($connect, $user_id, $status_array)
     return mysqli_query($connect, $query);
 }
 
-$upcoming_result = getAppointments($connect, $user_id, ['Pending', 'Approved']);
-$previous_result = getAppointments($connect, $user_id, ['Completed']);
-$deferred_result = getAppointments($connect, $user_id, ['Deferred', 'Cancelled']);
+$pending_result   = getAppointments($connect, $user_id, ['Pending']);
+$upcoming_result  = getAppointments($connect, $user_id, ['Confirmed', 'Approved']);
+$previous_result  = getAppointments($connect, $user_id, ['Completed']);
+$deferred_result  = getAppointments($connect, $user_id, ['Deferred', 'Cancelled']);
 ?>
 
 <!DOCTYPE html>
@@ -140,12 +141,28 @@ $deferred_result = getAppointments($connect, $user_id, ['Deferred', 'Cancelled']
         .apt-row:hover {
             transform: scale(1.01);
         }
+/* Hanapin ang part na ito sa iyong <style> at palitan ng ganito: */
 
-        .apt-row.Pending { border-left-color: var(--status-orange); }
-        .apt-row.Approved { border-left-color: var(--status-green); }
-        .apt-row.Completed { border-left-color: var(--status-blue); }
-        .apt-row.Cancelled, .apt-row.Deferred { border-left-color: var(--peter-pink); }
+.apt-row.Approved, 
+.apt-row.Confirmed,
+.apt-row.approved,
+.apt-row.confirmed { 
+    border-left: 12px solid var(--status-green) !important; 
+}
 
+.apt-row.Pending,
+.apt-row.pending { 
+    border-left: 12px solid var(--status-orange) !important; 
+}
+
+.apt-row.Completed,
+.apt-row.completed { 
+    border-left: 12px solid var(--status-blue) !important; 
+}
+.apt-row.Deferred,
+.apt-row.deferred { 
+    border-left: 12px solid var(--peter-pink) !important; 
+}
         .apt-grid {
             display: grid;
             grid-template-columns: 1.2fr 1.2fr 1fr;
@@ -260,80 +277,105 @@ $deferred_result = getAppointments($connect, $user_id, ['Deferred', 'Cancelled']
 
         <?php include '../component/modalPatientSchedule.php'; ?>
 
-        <main>
-            <div class="appointment-main-card">
-                <h1 class="main-title">Patient's Schedule</h1>
+       <main>
+    <div class="appointment-main-card">
+        <h1 class="main-title">Patient's Schedule</h1>
 
-                <h2 class="sub-title">Upcoming Appointments</h2>
-                <?php if (mysqli_num_rows($upcoming_result) > 0):
-                    while ($row = mysqli_fetch_assoc($upcoming_result)):
-                        $status_class = (strtolower($row['status']) == 'pending') ? 'bg-orange' : 'bg-green';
-                ?>
-                        <div class="apt-row <?php echo $row['status']; ?>" onclick="showDetails(<?php echo htmlspecialchars(json_encode($row)); ?>)">
-                            <div class="apt-grid">
-                                <div>
-                                    <span class="text-main"><?php echo date('g:i a M d, Y', strtotime($row['appointment_date'] . ' ' . $row['appointment_time'])); ?></span>
-                                    <span class="text-sub"><?php echo htmlspecialchars($user['name']); ?></span>
-                                </div>
-                                <div>
-                                    <span class="text-sub">Preferred Date: <b><?php echo date('M d, Y', strtotime($row['appointment_date'])); ?></b></span>
-                                    <span class="text-sub">Created Date: <b><?php echo date('M d, Y', strtotime($row['created_at'])); ?></b></span>
-                                </div>
-                                <div class="doctor-status-col">
-                                    <span class="text-main">Dr. <?php echo htmlspecialchars($row['doctor_name'] ?? 'Admin'); ?></span>
-                                    <span class="status-tag <?php echo $status_class; ?>"><?php echo $row['status']; ?></span>
-                                </div>
-                            </div>
-                            <div class="status-box"></div>
+        <h2 class="sub-title">Upcoming Appointments</h2>
+        <?php if (mysqli_num_rows($upcoming_result) > 0):
+            while ($row = mysqli_fetch_assoc($upcoming_result)): ?>
+                <div class="apt-row Confirmed" onclick="showDetails(<?php echo htmlspecialchars(json_encode($row)); ?>)">
+                    <div class="apt-grid">
+                        <div>
+                            <span class="text-main"><?php echo date('g:i a M d, Y', strtotime($row['appointment_date'] . ' ' . $row['appointment_time'])); ?></span>
+                            <span class="text-sub"><?php echo htmlspecialchars($user['name']); ?></span>
                         </div>
-                <?php endwhile;
-                else: echo "<p class='text-sub'>No upcoming appointments.</p>";
-                endif; ?>
+                        <div>
+                            <span class="text-sub">Schedule: <b><?php echo date('M d, Y', strtotime($row['appointment_date'])); ?></b></span>
+                            <span class="text-sub">Approved Date: <b style="color: var(--status-gray);"><?php echo date('M d, Y', strtotime($row['updated_at'])); ?></b></span>
+                        </div>
+                        <div class="doctor-status-col">
+                            <span class="text-main">Dr. <?php echo htmlspecialchars($row['doctor_name'] ?? 'Admin'); ?></span>
+                            <span class="status-tag bg-green"><?php echo $row['status']; ?></span>
+                        </div>
+                    </div>
+                    <div class="status-box" style="background: var(--status-green);"></div>
+                </div>
+        <?php endwhile;
+        else: echo "<p class='text-sub'>No upcoming confirmed appointments.</p>";
+        endif; ?>
 
-                <h2 class="sub-title">Previous Appointments</h2>
-                <?php if (mysqli_num_rows($previous_result) > 0):
-                    while ($row = mysqli_fetch_assoc($previous_result)): ?>
-                        <div class="apt-row Completed" onclick="showDetails(<?php echo htmlspecialchars(json_encode($row)); ?>)">
-                            <div class="apt-grid">
-                                <div>
-                                    <span class="text-main"><?php echo date('M d, Y', strtotime($row['appointment_date'])); ?></span>
-                                    <span class="text-sub"><?php echo htmlspecialchars($user['name']); ?></span>
-                                </div>
-                                <div><span class="text-sub">Created: <b><?php echo date('M d, Y', strtotime($row['created_at'])); ?></b></span></div>
-                                <div class="doctor-status-col">
-                                    <span class="text-main">Dr. <?php echo htmlspecialchars($row['doctor_name'] ?? 'Admin'); ?></span>
-                                    <span class="status-tag bg-blue">Completed</span>
-                                </div>
-                            </div>
-                            <div class="status-box"></div>
+        <h2 class="sub-title">Pending Appointments</h2>
+        <?php if (mysqli_num_rows($pending_result) > 0):
+            while ($row = mysqli_fetch_assoc($pending_result)): ?>
+                <div class="apt-row Pending" onclick="showDetails(<?php echo htmlspecialchars(json_encode($row)); ?>)">
+                    <div class="apt-grid">
+                        <div>
+                            <span class="text-main"><?php echo date('g:i a M d, Y', strtotime($row['appointment_date'] . ' ' . $row['appointment_time'])); ?></span>
+                            <span class="text-sub"><?php echo htmlspecialchars($user['name']); ?></span>
                         </div>
-                <?php endwhile;
-                endif; ?>
+                        <div>
+                            <span class="text-sub">Preferred Date: <b><?php echo date('M d, Y', strtotime($row['appointment_date'])); ?></b></span>
+                            <span class="text-sub">Created Date: <b><?php echo date('M d, Y', strtotime($row['created_at'])); ?></b></span>
+                        </div>
+                        <div class="doctor-status-col">
+                            <span class="text-main">Dr. <?php echo htmlspecialchars($row['doctor_name'] ?? 'Admin'); ?></span>
+                            <span class="status-tag bg-orange">Pending</span>
+                        </div>
+                    </div>
+                    <div class="status-box" style="background: var(--status-orange);"></div>
+                </div>
+        <?php endwhile;
+        else: echo "<p class='text-sub'>No Pending appointments.</p>";
+        endif; ?>
 
-                <h2 class="sub-title">DEFERRED Appointments</h2>
-                <?php if (mysqli_num_rows($deferred_result) > 0):
-                    while ($row = mysqli_fetch_assoc($deferred_result)): ?>
-                        <div class="apt-row Deferred" onclick="showDetails(<?php echo htmlspecialchars(json_encode($row)); ?>)">
-                            <div class="apt-grid">
-                                <div>
-                                    <span class="text-main"><?php echo date('M d, Y', strtotime($row['appointment_date'])); ?></span>
-                                    <span class="text-sub"><?php echo htmlspecialchars($user['name']); ?></span>
-                                </div>
-                                <div>
-                                    <span class="text-sub">Created: <b><?php echo date('M d, Y', strtotime($row['created_at'])); ?></b></span>
-                                    <span class="text-sub">Deferred Date: <b><?php echo date('M d, Y', strtotime($row['updated_at'] ?? $row['created_at'])); ?></b></span>
-                                </div>
-                                <div class="doctor-status-col">
-                                    <span class="text-main">Dr. <?php echo htmlspecialchars($row['doctor_name'] ?? 'Admin'); ?></span>
-                                    <span class="status-tag bg-pink"><?php echo $row['status']; ?></span>
-                                </div>
-                            </div>
-                            <div class="status-box"></div>
+        <h2 class="sub-title">Previous Appointments</h2>
+        <?php if (mysqli_num_rows($previous_result) > 0):
+            while ($row = mysqli_fetch_assoc($previous_result)): ?>
+                <div class="apt-row Completed" onclick="showDetails(<?php echo htmlspecialchars(json_encode($row)); ?>)">
+                    <div class="apt-grid">
+                        <div>
+                            <span class="text-main"><?php echo date('M d, Y', strtotime($row['appointment_date'])); ?></span>
+                            <span class="text-sub"><?php echo htmlspecialchars($user['name']); ?></span>
                         </div>
-                <?php endwhile;
-                endif; ?>
-            </div>
-        </main>
+                        <div>
+                            <span class="text-sub">Visit Reason: <b><?php echo htmlspecialchars($row['reason']); ?></b></span>
+                            <span class="text-sub">Completed Date: <b style="color: var(--status-gray);"><?php echo date('M d, Y', strtotime($row['updated_at'])); ?></b></span>
+                        </div>
+                        <div class="doctor-status-col">
+                            <span class="text-main">Dr. <?php echo htmlspecialchars($row['doctor_name'] ?? 'Admin'); ?></span>
+                            <span class="status-tag bg-blue">Completed</span>
+                        </div>
+                    </div>
+                    <div class="status-box" style="background: var(--status-blue);"></div>
+                </div>
+        <?php endwhile;
+        endif; ?>
+
+        <h2 class="sub-title">Deferred Appointments</h2>
+        <?php if (mysqli_num_rows($deferred_result) > 0):
+            while ($row = mysqli_fetch_assoc($deferred_result)): ?>
+                <div class="apt-row Deferred" onclick="showDetails(<?php echo htmlspecialchars(json_encode($row)); ?>)">
+                    <div class="apt-grid">
+                        <div>
+                            <span class="text-main"><?php echo date('M d, Y', strtotime($row['appointment_date'])); ?></span>
+                            <span class="text-sub"><?php echo htmlspecialchars($user['name']); ?></span>
+                        </div>
+                        <div>
+                            <span class="text-sub">Created: <b><?php echo date('M d, Y', strtotime($row['created_at'])); ?></b></span>
+                            <span class="text-sub">Deferred Date: <b><?php echo date('M d, Y', strtotime($row['updated_at'])); ?></b></span>
+                        </div>
+                        <div class="doctor-status-col">
+                            <span class="text-main">Dr. <?php echo htmlspecialchars($row['doctor_name'] ?? 'Admin'); ?></span>
+                            <span class="status-tag bg-pink"><?php echo $row['status']; ?></span>
+                        </div>
+                    </div>
+                    <div class="status-box" style="background: var(--peter-pink);"></div>
+                </div>
+        <?php endwhile;
+        endif; ?>
+    </div>
+</main>
     </div>
 
     <div id="detailsModal" class="modal">
