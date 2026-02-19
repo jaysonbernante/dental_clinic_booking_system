@@ -142,10 +142,73 @@ $profile_img = !empty($user_data['profile_pix'])
     </div>
 </header>
 
-<div class="modal-overlay" id="photoModal">...</div>
-<div class="modal-overlay" id="settingsModal">...</div>
-<div class="modal-overlay" id="confirmResetModal">...</div>
-
+<div class="modal-overlay" id="photoModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Profile Photo</h3>
+                <i class="fa-solid fa-xmark" onclick="closeModal('photoModal')" style="cursor:pointer"></i>
+            </div>
+            <form action="../action/update_profile.php" method="POST" enctype="multipart/form-data">
+                <div style="text-align:center; padding:15px; background:#f9f9f9; border-radius:10px; margin-bottom:15px;">
+                    <img id="preview" src="<?php echo $profile_img; ?>" style="width:180px; height:180px; object-fit:cover; border-radius:10px;">
+                </div>
+                <input type="file" name="profile_photo" id="fileInput" hidden onchange="previewImg(event)">
+                <button type="button" onclick="document.getElementById('fileInput').click()" style="width:100%; padding:10px; background:var(--peter-blue); color:white; border:none; border-radius:5px; cursor:pointer; margin-bottom:10px;">Browse Image</button>
+                <div style="display:flex; justify-content:flex-end; gap:10px;">
+                    <button type="button" class="btn-cancel" onclick="closeModal('photoModal')">Cancel</button>
+                    <button type="submit" class="btn-save">Save Photo</button>
+                </div>
+            </form>
+        </div>
+    </div>
+<div class="modal-overlay" id="settingsModal">
+        <div class="modal-content large">
+            <div class="modal-header">
+                <h3>Account Setting</h3>
+                <i class="fa-solid fa-xmark" onclick="closeModal('settingsModal')" style="cursor:pointer"></i>
+            </div>
+            <form action="../action/update_profile.php" method="POST">
+                <input type="hidden" name="update_settings" value="1">
+                <div class="settings-grid">
+                    <div class="form-group"><label>Email Address</label><input type="text" value="<?php echo $user_data['email']; ?>" readonly></div>
+                    <div class="form-group">
+                        <label>Password</label>
+                        <button type="button" id="resetBtn" onclick="requestReset()" 
+                                style="padding:10px; background:#e3f2fd; border:none; color:var(--peter-blue); border-radius:5px; cursor:pointer; width: 100%;">
+                            <i class="fa-solid fa-paper-plane"></i> Send Reset Link to Gmail
+                        </button>
+                    </div>
+                    <div class="form-group"><label>First Name *</label><input type="text" name="first_name" value="<?php echo $user_data['first_name']; ?>" required></div>
+                    <div class="form-group"><label>Middle Name</label><input type="text" name="middle_name" value="<?php echo $user_data['middle_name']; ?>"></div>
+                    <div class="form-group"><label>Last Name *</label><input type="text" name="last_name" value="<?php echo $user_data['last_name']; ?>" required></div>
+                    <div class="form-group"><label>Birthday</label><input type="date" name="birthday" value="<?php echo $user_data['birthday']; ?>"></div>
+                    <div class="form-group"><label>Mobile Number</label><input type="text" name="mobile_number" value="<?php echo $user_data['mobile_number']; ?>"></div>
+                    <div class="form-group"><label>Gender</label>
+                        <select name="gender">
+                            <option value="Male" <?php if($user_data['gender']=='Male') echo 'selected'; ?>>Male</option>
+                            <option value="Female" <?php if($user_data['gender']=='Female') echo 'selected'; ?>>Female</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group"><label>Address</label><input type="text" name="address" value="<?php echo $user_data['address']; ?>"></div>
+                <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
+                    <button type="button" class="btn-cancel" onclick="closeModal('settingsModal')">Cancel</button>
+                    <button type="submit" class="btn-save">Update Profile</button>
+                </div>
+            </form>
+        </div>
+    </div>
+<div class="modal-overlay" id="confirmResetModal">
+        <div class="modal-content" style="max-width: 400px; text-align: center;">
+            <i class="fa-solid fa-circle-question" style="font-size: 50px; color: var(--peter-blue); margin-bottom: 15px;"></i>
+            <h3>Are you sure?</h3>
+            <p>A password reset link will be sent to:<br><strong><?php echo $user_data['email']; ?></strong></p>
+            <div style="display:flex; justify-content:center; gap:10px; margin-top:20px;">
+                <button class="btn-cancel" onclick="closeModal('confirmResetModal')">Cancel</button>
+                <button class="btn-save" onclick="executeReset()">Yes, Send it</button>
+            </div>
+        </div>
+    </div>
 <div id="toast">
     <div id="toastIcon"></div>
     <span id="toastMsg"></span>
@@ -191,7 +254,8 @@ $profile_img = !empty($user_data['profile_pix'])
         reader.onload = () => { document.getElementById('preview').src = reader.result; };
         reader.readAsDataURL(event.target.files[0]);
     }
-
+    function requestReset() { openModal('confirmResetModal'); }
+    
     function executeReset() {
         closeModal('confirmResetModal');
         const email = "<?php echo $user_data['email']; ?>";

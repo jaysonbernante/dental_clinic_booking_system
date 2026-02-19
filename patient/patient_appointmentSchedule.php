@@ -130,7 +130,7 @@ $history_result = mysqli_query($connect, $history_query);
               ?>
             </select>
           </div>
-
+          // Reason Dropdown with Common Dental Issues changed to a select dropdown for better UX
           <div class="input-wrap">
             <label>Reason to Visit</label>
             <select name="reason" required>
